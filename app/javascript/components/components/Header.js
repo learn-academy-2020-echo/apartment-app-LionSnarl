@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { NavLink } from 'react-router-dom'
 
 class Header extends Component {
   render() {
@@ -10,16 +11,21 @@ class Header extends Component {
     } = this.props
     return (
       <>
-        <h1>FindApartment App!</h1>
         {/* Devise Routes Below, Conditional Rendering */}
-        {
-          !logged_in &&
-          <a href={ sign_in_route }>Sign In</a>
-        }
-        {
-          logged_in &&
-          <a href= { sign_out_route }>Sign Out</a>
-        }
+        <ul>
+            {
+              !logged_in &&
+              <li><a href={ sign_in_route }>Sign In</a></li>
+            }
+            {
+              logged_in &&
+              <li><a href={ sign_out_route }>Sign Out</a></li>
+            }
+            <li><NavLink to="/">Home</NavLink></li>
+            <li><NavLink to="/aptindex">Apartment Listings</NavLink></li>
+            <li><NavLink to="/myapt">My Apartments</NavLink></li>
+            <li><NavLink to="/myaptnew">Add Apartment</NavLink></li>
+          </ul>
       </>
     )
   }
