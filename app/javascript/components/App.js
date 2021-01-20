@@ -5,6 +5,8 @@ import Home from './pages/Home'
 import ApartmentIndex from './pages/ApartmentIndex'
 import ApartmentShow from './pages/ApartmentShow'
 import ProtectedIndex from './pages/ProtectedIndex'
+import ApartmentNew from './pages/ApartmentNew'
+import ApartmentEdit from './pages/ApartmentEdit'
 import NotFound from './pages/NotFound'
 
 import {
@@ -13,18 +15,68 @@ import {
   Switch
 } from 'react-router-dom'
 
-import mockApartments from './mockApartments.js'
+//import mockApartments from './mockApartments.js'
 
 class App extends Component {
   constructor(props){
     super(props)
     this.state = {
-      apartments: mockApartments
+      apartments: []
     }
   }
+
+  componentDidMount(){
+    this.indexApartment()
+  }
+
+  indexApartment = () => {
+    fetch("/apartments")
+    .then(response => {
+      return response.json()
+    })
+    .then(payload => {
+      this.setState({ apartments: payload })
+    })
+    .catch(errors => {
+      console.log("index errors:", errors)
+    })
+  }
+
+  createNewApartment = (newapartment) => {
+    console.log(newapartment)
+    fetch("/apartments", {
+      body: JSON.stringify(newapartment),
+      headers: {
+        "Content-Type": "application/json"
+      },
+      method: "POST"
+    })
+    .then(response => {
+      if(response.status === 422){
+        alert("There is something wrong with your submission.")
+      }
+      return response.json()
+    })
+    .then(() => {
+      this.indexApartment()
+    })
+    .catch(errors => {
+      console.log("create errors", errors)
+    })
+  }
+
+  editApartment = (editedapartment) => {
+    console.log(editedapartment)
+  }
+
+  deleteApartment = (apartment) => {
+    console.log(apartment)
+  }
+
   render () {
+    //console.log(this.state.apartments)
     console.log("logged in", this.props.logged_in)
-    // console.log("current user", this.props.current_user.id)
+    //console.log("current user", this.props.current_user.id)
     return (
       <Router>
 
@@ -56,6 +108,7 @@ class App extends Component {
           />
 
           {/* Protected Index */}
+          {this.props.logged_in && (
           <Route
             path='/myapt'
             render={ (props) => {
@@ -63,7 +116,34 @@ class App extends Component {
               let myapartments = this.state.apartments.filter(apt => apt.user_id === id)
               console.log(myapartments)
               return(
-                <ProtectedIndex myapartments={ myapartments } />
+                <ProtectedIndex myapartments={ myapartments } 
+                deleteApartment={ this.deleteApartment } />
+              )
+            }}
+          />
+          )}
+
+          {/* Protected Apt New */}
+                    <Route
+            path="/myaptnew"
+            render={ (props) => {
+              return (
+                <ApartmentNew current_user={ this.props.current_user } createNewApartment={ this.createNewApartment } />
+              )
+            }}
+          />
+          {/*  Protected Apartment Edit */}
+                    <Route
+            path="/aptedit/:id"
+            render={ (props) => {
+              let id = props.match.params.id
+              let apartment = this.state.apartments.find(apartment => apartment.id === parseInt(id))
+              return (
+                <ApartmentEdit
+                  current_user={ this.props.current_user }
+                  editApartment={ this.editApartment }
+                  apartment= { apartment }
+                />
               )
             }}
           />
